@@ -1,10 +1,10 @@
 package main
 
 import (
-	"../../taloscdk"
 	"github.com/aws/aws-cdk-go/awscdk"
 	"github.com/aws/constructs-go/constructs/v3"
 	"github.com/aws/jsii-runtime-go"
+	"github.com/steveyackey/taloscdk"
 )
 
 type SingleNodeStackProps struct {

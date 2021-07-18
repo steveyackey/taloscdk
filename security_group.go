@@ -25,14 +25,14 @@ func NewSecurityGroup(scope constructs.Construct, id *string, props *SecurityGro
 		props.AllowTrafficFrom = awsec2.Peer_AnyIpv4()
 	}
 
-	cpSecurityGroup := awsec2.NewSecurityGroup(scope, id, &awsec2.SecurityGroupProps{
+	sg := awsec2.NewSecurityGroup(scope, id, &awsec2.SecurityGroupProps{
 		Vpc:               props.Vpc,
 		AllowAllOutbound:  jsii.Bool(true),
 		Description:       jsii.String("Talos Control Plane Security Group"),
 		SecurityGroupName: id,
 	})
 
-	cpSecurityGroup.AddIngressRule(
+	sg.AddIngressRule(
 		props.AllowTrafficFrom,
 		awsec2.NewPort(&awsec2.PortProps{
 			Protocol:             awsec2.Protocol_TCP,
@@ -43,7 +43,7 @@ func NewSecurityGroup(scope constructs.Construct, id *string, props *SecurityGro
 		jsii.Bool(false),
 	)
 
-	cpSecurityGroup.AddIngressRule(
+	sg.AddIngressRule(
 		props.AllowTrafficFrom,
 		awsec2.NewPort(&awsec2.PortProps{
 			Protocol:             awsec2.Protocol_TCP,
@@ -54,10 +54,12 @@ func NewSecurityGroup(scope constructs.Construct, id *string, props *SecurityGro
 		jsii.Bool(false),
 	)
 
-	cpSecurityGroup.AddIngressRule(
-		cpSecurityGroup,
+	sg.AddIngressRule(
+		sg,
 		awsec2.Port_AllTraffic(),
 		jsii.String("Allow all internal traffic"),
 		jsii.Bool(false),
 	)
+
+	return sg
 }
