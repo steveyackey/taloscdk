@@ -1,8 +1,8 @@
 package main
 
 import (
+	"../../taloscdk"
 	"github.com/aws/aws-cdk-go/awscdk"
-	"github.com/aws/aws-cdk-go/awscdk/awssns"
 	"github.com/aws/constructs-go/constructs/v3"
 	"github.com/aws/jsii-runtime-go"
 )
@@ -18,12 +18,7 @@ func NewSingleNodeStack(scope constructs.Construct, id string, props *SingleNode
 	}
 	stack := awscdk.NewStack(scope, &id, &sprops)
 
-	// The code that defines your stack goes here
-
-	// as an example, here's how you would define an AWS SNS topic:
-	awssns.NewTopic(stack, jsii.String("MyTopic"), &awssns.TopicProps{
-		DisplayName: jsii.String("MyCoolTopic"),
-	})
+	taloscdk.NewSingleNode(stack, jsii.String("TalsoSingleNodeCluster"), &taloscdk.SingleNodeProps{})
 
 	return stack
 }
