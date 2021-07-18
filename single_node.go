@@ -14,7 +14,7 @@ type SingleNodeProps struct {
 	SingleNodeOnly *bool
 }
 
-func NewSingleNode(scope constructs.Construct, id *string, props SingleNodeProps) constructs.Construct {
+func NewSingleNode(scope constructs.Construct, id *string, props *SingleNodeProps) constructs.Construct {
 	construct := constructs.NewConstruct(scope, jsii.String("TalosNode"), &constructs.ConstructOptions{})
 	NewSecurityGroup(construct, jsii.String("TalosSG"), &SecurityGroupProps{})
 	return construct
