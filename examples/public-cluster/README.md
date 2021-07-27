@@ -42,7 +42,7 @@ cdk deploy
 
 ### Update Talosconfig
 Replace the endpoint in your talosconfig with the control plane node's IP.
-
+```
 talosctl --talosconfig=talosconfig dmesg -n <ip>
 talosctl --talosconfig=talosconfig bootstrap -n <ip>
 talosctl --talosconfig=talosconfig dmesg -n <ip> -f # until node is ready and etcd bootstrap is complete
