@@ -39,7 +39,7 @@ cdk deploy
 
 ### Update Talosconfig
 Replace the endpoint in your talosconfig with the one in the output of `cdk deploy`
-
+```
 talosctl --talosconfig=../../cluster-config/talosconfig dmesg -n <ip>
 talosctl --talosconfig=../../cluster-config/talosconfig bootstrap -n <ip>
 talosctl --talosconfig=../../cluster-config/talosconfig dmesg -n <ip> -f # until node is ready and etcd bootstrap is complete
