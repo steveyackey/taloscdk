@@ -20,7 +20,45 @@ func NewSingleNodeStack(scope constructs.Construct, id string, props *SingleNode
 	}
 	stack := awscdk.NewStack(scope, &id, &sprops)
 
-	taloscdk.NewSingleNode(stack, jsii.String("TalsoSingleNodeCluster"), taloscdk.SingleNodeProps{})
+	config, err := taloscdk.LoadConfig("./controlplane.yaml")
+	if err != nil {
+		panic("Could not load talos config")
+	}
+
+	cp := taloscdk.NewSingleNode(stack, jsii.String("TalsoSingleNodeCluster"), &taloscdk.SingleNodeProps{
+		TalosNodeConfig:     config,
+		TransformConfig:     jsii.Bool(true),
+		EndpointToOverwrite: jsii.String("talos.cluster"),
+	})
+
+	// Optional Second Node.
+	// Creating a second node will allow you to use the aws-controller-manager for
+	// loadbalancers without needing to remove the master node label on the node
+	// (along with the nodeAffinity from the aws-controller-manager).
+
+	// workerConfig, err := taloscdk.LoadConfig("./join.yaml")
+	// if err != nil {
+	// 	panic("Could not load talos config")
+	// }
+
+	// taloscdk.NewSingleNode(stack, jsii.String("TalosWorker"), &taloscdk.SingleNodeProps{
+	// 	TalosNodeConfig:     workerConfig,
+	// 	TransformConfig:     jsii.Bool(true),
+	// 	EndpointToOverwrite: jsii.String("talos.cluster"),
+	// 	OverwriteValue:      cp.GetEIPAddress(),
+	// 	Vpc: awsec2.Vpc_FromLookup(stack, jsii.String("VPC"), &awsec2.VpcLookupOptions{
+	// 		IsDefault: jsii.Bool(true),
+	// 	}),
+	// 	SecurityGroup: cp.SecurityGroup,
+	// 	CreateEIP:     jsii.Bool(false),
+	// 	IAMRole:       taloscdk.NewWorkerIAMRole(stack, jsii.String("WorkerRole")),
+	// })
+
+	// Output the EIP. You may need to clean this up manually when destroying this stack.
+	awscdk.NewCfnOutput(stack, jsii.String("TalosSingleNodeClusterEndpoint"), &awscdk.CfnOutputProps{
+		Value:       cp.GetEIPAddress(),
+		Description: jsii.String("Use this IP address in your talosconfig as the endpoint and node."),
+	})
 
 	return stack
 }
@@ -33,7 +71,6 @@ func main() {
 			Env: env(),
 		},
 	})
-
 	app.Synth(nil)
 }
 

@@ -1,0 +1,6 @@
+talosconfig
+kubeconfig
+controlplane.yaml
+init.yaml
+join.yaml
+cdk.context.json

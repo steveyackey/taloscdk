@@ -1,10 +1,13 @@
 package main
 
 import (
+	"os"
+
 	"github.com/aws/aws-cdk-go/awscdk"
-	"github.com/aws/aws-cdk-go/awscdk/awssns"
+	"github.com/aws/aws-cdk-go/awscdk/awsec2"
 	"github.com/aws/constructs-go/constructs/v3"
 	"github.com/aws/jsii-runtime-go"
+	"github.com/steveyackey/taloscdk"
 )
 
 type PublicClusterStackProps struct {
@@ -18,11 +21,43 @@ func NewPublicClusterStack(scope constructs.Construct, id string, props *PublicC
 	}
 	stack := awscdk.NewStack(scope, &id, &sprops)
 
-	// The code that defines your stack goes here
+	// Look up the default VPC
+	vpc := awsec2.Vpc_FromLookup(stack, jsii.String("VPC"), &awsec2.VpcLookupOptions{
+		IsDefault: jsii.Bool(true),
+	})
 
-	// as an example, here's how you would define an AWS SNS topic:
-	awssns.NewTopic(stack, jsii.String("MyTopic"), &awssns.TopicProps{
-		DisplayName: jsii.String("MyCoolTopic"),
+	// Load controlplane.yaml
+	config, err := taloscdk.LoadConfig("./controlplane.yaml")
+	if err != nil {
+		panic("Could not load talos config")
+	}
+
+	// Create a new control plane Autoscaling Group
+	cp := taloscdk.NewControlPlane(stack, jsii.String("TalosCP"), &taloscdk.ControlPlaneProps{
+		TalosNodeConfig:     config,
+		TransformConfig:     jsii.Bool(true),
+		EndpointToOverwrite: jsii.String("talos.cluster"),
+		Vpc:                 vpc,
+		SubnetSelection:     &awsec2.SubnetSelection{SubnetType: awsec2.SubnetType_PUBLIC},
+	})
+
+	// Load the join.yaml worker config
+	workerConfig, err := taloscdk.LoadConfig("./join.yaml")
+	if err != nil {
+		panic("Could not load talos config")
+	}
+
+	// Create a new ASG for worker nodes
+	// For an example of creating a separate worker security group, see the
+	// private-cluster example.
+	taloscdk.NewWorkerASG(stack, jsii.String("WorkerASG"), &taloscdk.WorkerASGProps{
+		TalosNodeConfig:     workerConfig,
+		TransformConfig:     jsii.Bool(true),
+		EndpointToOverwrite: jsii.String("talos.cluster"),
+		OverwriteValue:      cp.NLB.LoadBalancerDnsName(),
+		Vpc:                 vpc,
+		SecurityGroup:       cp.SecurityGroup,
+		SubnetSelection:     &awsec2.SubnetSelection{SubnetType: awsec2.SubnetType_PUBLIC},
 	})
 
 	return stack
@@ -47,7 +82,7 @@ func env() *awscdk.Environment {
 	// Account/Region-dependent features and context lookups will not work, but a
 	// single synthesized template can be deployed anywhere.
 	//---------------------------------------------------------------------------
-	return nil
+	// return nil
 
 	// Uncomment if you know exactly what account and region you want to deploy
 	// the stack to. This is the recommendation for production stacks.
@@ -61,8 +96,8 @@ func env() *awscdk.Environment {
 	// implied by the current CLI configuration. This is recommended for dev
 	// stacks.
 	//---------------------------------------------------------------------------
-	// return &awscdk.Environment{
-	//  Account: jsii.String(os.Getenv("CDK_DEFAULT_ACCOUNT")),
-	//  Region:  jsii.String(os.Getenv("CDK_DEFAULT_REGION")),
-	// }
+	return &awscdk.Environment{
+		Account: jsii.String(os.Getenv("CDK_DEFAULT_ACCOUNT")),
+		Region:  jsii.String(os.Getenv("CDK_DEFAULT_REGION")),
+	}
 }

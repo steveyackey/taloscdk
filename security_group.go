@@ -8,16 +8,24 @@ import (
 )
 
 type SecurityGroupProps struct {
-	Vpc              awsec2.IVpc
+	// Required.
+	Vpc awsec2.IVpc
+
+	// AllowTrafficFrom is the peer to allow ingress to the Kubernetes and Talos APIs.
+	// Default: awsec2.Peer_AnyIpv4
 	AllowTrafficFrom awsec2.IPeer
 }
 
+// NewSecurityGroup returns a security group that enables ingress to 6443, 50000, 50001,
+// as well as all internal traffic within the security group.
+// Requires a Vpc in the *SecurityGroupProps
 func NewSecurityGroup(scope constructs.Construct, id *string, props *SecurityGroupProps) awsec2.SecurityGroup {
+	if props == nil {
+		props = &SecurityGroupProps{}
+	}
 
 	if props.Vpc == nil {
-		props.Vpc = awsec2.Vpc_FromLookup(scope, jsii.String("vpc"), &awsec2.VpcLookupOptions{
-			IsDefault: jsii.Bool(true),
-		})
+		panic("NewSecurityGroup() requires a Vpc in SecurityGroupProps")
 	}
 
 	// Default to allow from all
@@ -25,11 +33,10 @@ func NewSecurityGroup(scope constructs.Construct, id *string, props *SecurityGro
 		props.AllowTrafficFrom = awsec2.Peer_AnyIpv4()
 	}
 
-	sg := awsec2.NewSecurityGroup(scope, id, &awsec2.SecurityGroupProps{
-		Vpc:               props.Vpc,
-		AllowAllOutbound:  jsii.Bool(true),
-		Description:       jsii.String("Talos Control Plane Security Group"),
-		SecurityGroupName: id,
+	sg := awsec2.NewSecurityGroup(scope, jsii.String("TalosSG"), &awsec2.SecurityGroupProps{
+		Vpc:              props.Vpc,
+		AllowAllOutbound: jsii.Bool(true),
+		Description:      jsii.String("Talos Security Group"),
 	})
 
 	sg.AddIngressRule(
@@ -57,7 +64,7 @@ func NewSecurityGroup(scope constructs.Construct, id *string, props *SecurityGro
 	sg.AddIngressRule(
 		sg,
 		awsec2.Port_AllTraffic(),
-		jsii.String("Allow all internal traffic"),
+		jsii.String("Allow all internal traffic between nodes"),
 		jsii.Bool(false),
 	)
 
