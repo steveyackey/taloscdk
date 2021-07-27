@@ -7,8 +7,4 @@ require (
 	github.com/aws/constructs-go/constructs/v3 v3.3.97
 	github.com/aws/jsii-runtime-go v1.31.0
 	github.com/steveyackey/taloscdk v0.1.0
-	github.com/stretchr/testify v1.7.0
-
-	// for testing
-	github.com/tidwall/gjson v1.7.4
 )
