@@ -12,12 +12,6 @@ import (
 	"github.com/aws/jsii-runtime-go"
 )
 
-type ClusterProps struct {
-	Name         *string
-	TalosVersion *string
-	Vpc          awsec2.IVpc
-}
-
 type ControlPlaneProps struct {
 	// ClusterName is used for tagging all resources with kubernetes.io/cluster/<name>=owned
 	// Default: talos
