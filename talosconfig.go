@@ -9,7 +9,7 @@ import (
 
 // LoadAndTransformMachineConfig takes a Talos cluster config file and replaces the endpoint with the
 // correct hostname or IP based on what CDK generates.
-// To get started, you can try running `talosctl gen config cdkcluster https://cdkcluster:6443`
+// To get started, you can try running `talosctl gen config talos https://talos.cluster:6443`
 // and use the controlplane.yaml as the filename
 func LoadConfig(fileName string) (*string, error) {
 	config, err := os.ReadFile(fileName)

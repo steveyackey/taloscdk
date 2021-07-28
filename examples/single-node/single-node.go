@@ -41,6 +41,9 @@ func NewSingleNodeStack(scope constructs.Construct, id string, props *SingleNode
 	// 	panic("Could not load talos config")
 	// }
 
+	// Below, you could also omit `Vpc`, as it will fall back to the default VPC. It's only
+	// added for the sake of example.
+
 	// taloscdk.NewSingleNode(stack, jsii.String("TalosWorker"), &taloscdk.SingleNodeProps{
 	// 	TalosNodeConfig:     workerConfig,
 	// 	TransformConfig:     jsii.Bool(true),

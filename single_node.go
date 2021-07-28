@@ -49,7 +49,10 @@ type SingleNodeProps struct {
 	// Default: jsii.Bool(true)
 	TransformConfig *bool
 
-	// EndpointToOverwrite  is the <endpoint> you used when running `talosctl gen config <clusterName> <endpoint>`
+	// EndpointToOverwrite  is the <endpoint> you used when running `talosctl gen config <clusterName> https://<endpoint>:6443`
+	// This will overwrite the <endpoint> in your config, while keeping https:// and the port (:6443).
+	// For example: in https://talos.cluster:6443, if you overwrite "talos.cluster", it would become https://YourOverwriteValue:6443
+	// By default, the OverwriteValue does not include protocl or port.
 	EndpointToOverwrite *string
 
 	// OverwriteValue to replace EndpointToOverwrite
